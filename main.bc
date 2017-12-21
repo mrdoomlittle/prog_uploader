@@ -1,2 +1,59 @@
+// --- ignore
+goto _entry;
+# include <micro.bc>
+# define clock 8
+# define latch 7
+# define data 6
+_entry:
+u8_t ps[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+set_pin_mode(1, latch);
+set_pin_mode(1, clock);
+set_pin_mode(1, data);
 
+void update_sr_ps() {
+	u8_t ic = 0;
+	while(ic != 8) {
+		if (ps[ic] == 1) {
+			set_pin_state(ps[ic], data);
+		} else {
+			set_pin_state(0, data);
+		}
+		set_pin_state(1, clock);
+		set_pin_state(0, clock);
+		ic++;
+	}
+
+	set_pin_state(1, latch);
+	set_pin_state(0, latch);
+}
+
+
+void set_sr_ps_and_update(u8_t __s, u8_t __pid) {
+	ps[__pid] = __s;
+	update_sr_ps();
+}
+
+u8_t pos = 0, dir = 0;
+//while (1) {
+	ps[pos] = 1;
+	if (dir == 0) {
+		if (pos != 0) {
+			ps[pos-1] = 0;
+		}
+		pos = pos + 1;
+	} else {
+		if (pos != 7) {
+			ps[pos+1] = 0;
+		}
+		pos = pos - 1;
+	}
+	if (pos == 0) {
+		dir = 0;
+	}
+	if (pos == 7) {
+		dir = 1;
+	}
+
+	update_sr_ps();
+//}
 exit;
